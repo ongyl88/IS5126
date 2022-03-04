@@ -1,0 +1,31 @@
+﻿SN,name,location,team_names,seasons,record,playoff_appearances,championships
+0,Philadelphia 76ers,Pennsylvania,"Philadelphia 76ers, Syracuse Nationals",73,0.519,51,3
+1,Brooklyn Nets,York,"Brooklyn Nets, New Jersey Nets, New York Nets, New Jersey Americans",55,0.438,29,2
+2,Boston Celtics,Massachusetts,Boston Celtics,76,0.59,58,17
+3,New York Knicks,York,New York Knicks,76,0.484,43,2
+4,Toronto Raptors,Canada,Toronto Raptors,27,0.478,12,1
+5,Utah Jazz,Utah,"Utah Jazz, New Orleans Jazz",48,0.546,30,0
+6,Portland Trail Blazers,Oregon,Portland Trail Blazers,52,0.535,37,1
+7,Denver Nuggets,Colorado,"Denver Nuggets, Denver Rockets",55,0.507,36,0
+8,Oklahoma City Thunder,Oklahoma,"Oklahoma City Thunder, Seattle SuperSonics",55,0.536,32,1
+9,Minnesota Timberwolves,Minnesota,Minnesota Timberwolves,33,0.397,9,0
+10,Milwaukee Bucks,Wisconsin,Milwaukee Bucks,54,0.523,33,2
+11,Chicago Bulls,Illinois,Chicago Bulls,56,0.511,35,6
+12,Indiana Pacers,Indiana,Indiana Pacers,55,0.513,36,3
+13,Cleveland Cavaliers,Ohio,Cleveland Cavaliers,52,0.462,22,1
+14,Detroit Pistons,Michigan,"Detroit Pistons, Fort Wayne Pistons",74,0.48,42,3
+15,Phoenix Suns,Arizona,Phoenix Suns,54,0.535,30,0
+16,Los Angeles Lakers,California,"Los Angeles Lakers, Minneapolis Lakers",74,0.593,62,17
+17,Los Angeles Clippers,California,"Los Angeles Clippers, San Diego Clippers, Buffalo Braves",52,0.416,16,0
+18,Golden State Warriors,California,"Golden State Warriors, San Francisco Warriors, Philadelphia Warriors",76,0.485,35,6
+19,Sacramento Kings,California,"Sacramento Kings, Kansas City Kings, Kansas City-Omaha Kings, Cincinnati Royals, Rochester Royals",74,0.455,29,1
+20,Miami Heat,Florida,Miami Heat,34,0.525,22,3
+21,Charlotte Hornets,Carolina,"Charlotte Bobcats, Charlotte Hornets",32,0.44,10,0
+22,Atlanta Hawks,Georgia,"Atlanta Hawks, St. Louis Hawks, Milwaukee Hawks, Tri-Cities Blackhawks",73,0.493,47,1
+23,Washington Wizards,Columbia,"Washington Wizards, Washington Bullets, Capital Bullets, Baltimore Bullets, Chicago Zephyrs, Chicago Packers",61,0.452,30,1
+24,Orlando Magic,Florida,Orlando Magic,33,0.468,16,0
+25,San Antonio Spurs,Texas,"San Antonio Spurs, Texas Chaparrals, Dallas Chaparrals",55,0.594,47,5
+26,Dallas Mavericks,Texas,Dallas Mavericks,42,0.504,23,1
+27,Memphis Grizzlies,Tennessee,"Memphis Grizzlies, Vancouver Grizzlies",27,0.426,11,0
+28,Houston Rockets,Texas,"Houston Rockets, San Diego Rockets",55,0.52,34,2
+29,New Orleans Pelicans,Louisiana,"New Orleans Pelicans, New Orleans/Oklahoma City Hornets, New Orleans Hornets",20,0.461,7,0

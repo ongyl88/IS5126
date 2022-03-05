@@ -69,10 +69,10 @@ nba_unlist <- as.numeric(unlist(nba_rmv_null))
 
 km_nba = kmeans(nba_salary, center = 3, nstart = 10)
 
-fviz_cluster(km_nba, data = nba,
-             palette = c("#00AFBB","#2E9FDF", "#FC4E07"),
-             ggtheme = theme_minimal(),
-             main = "Three clusters on the plane of first two PCs of 'mroz'.")
+# fviz_cluster(km_nba, data = nba,
+#              palette = c("#00AFBB","#2E9FDF", "#FC4E07"),
+#              ggtheme = theme_minimal(),
+#              main = "Three clusters on the plane of first two PCs of 'mroz'.")
 
 
 # plot the ``within-cluster sum of squares distance'' as a function of the number of clusters

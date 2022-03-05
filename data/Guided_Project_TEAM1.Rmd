@@ -1,0 +1,253 @@
+---
+title: 'IS5126 Guided Project'
+subtitle: "IS5126 Hands-on with Applied Analytics"
+author: "Team 1: Neal Wong, Nicholas Leong, Sean Xu Shunjie, Ong Yi Long, Nigel Ngan Zisheng"
+date: 'Due by: Mar 07, 2022 5:00 PM'
+output: 
+  pdf_document:
+    df_print: kable
+    highlight: tango
+    fig_width: 6
+    fig_height: 4
+    fig_caption: true
+linkcolor: MidnightBlue
+header-includes:
+- \usepackage{xcolor}
+---
+
+```{r load-libraries, echo=TRUE, message=FALSE, warning=FALSE}
+# load required packages
+library(dplyr)
+library(wooldridge)
+library(rcompanion)
+library(readxl)
+library(tidyr)
+library(ggplot2) 
+library(car)
+library(sandwich)
+library(lmtest)
+library(caret)
+```
+## Part C: Data Analytics (50 points)
+
+- Dataset required: `data('out')`
+
+In this section, you need to perform data analytics techniques on the prepared data set, with
+either R or Python, and justify/interpret the model. You should have a basic understanding of
+basketball such as how the game is played, the role of each position, and basic information on
+how players are recruited, \drafted," for each team.
+Answer the following questions.
+
+```{r data-input, echo=TRUE}
+nba = read.csv(file = 'output.csv', header= TRUE)
+```
+
+Details
+1. Clustering. Which players are similar? (10 points)
+
+a. Apply \k-means" algorithm.
+
+
+
+\textcolor{BrickRed}{When all other independent variables are held constant, tserved: -0.25630 shows that time served is negatively correlated to durat. Every 1 unit shift in tserved causes a -0.25630 change in the mean of the time until return for the prisoner which suggests a quicker relapse time the longer the time served. tserved is significant at 5 percent level. workprg: 2.32777 shows a positive correlation to durat. Convicts who have gone through the prison working program will relapse into criminal offense after release from the prison later by approximately 2.33 months. However, this variable is not significant at the 5 percent level, not even at the 10 percent level. Hence, this variable should not be retained from the regression results.}
+
+```{r q2a, echo=TRUE}
+km_nba = kmeans(nba, center = 3, nstart = 10)
+
+```
+
+
+(2b) The warden of prison decided to terminate the working program. Do you agree with his/her decision? Why or why not? (6 points)
+
+Hint: One of most effective way to be critical is to check the assumptions used to reach the conclusion and decision.
+
+\textcolor{BrickRed}{Based on the above model, it suggests that the working program is positively correlated with duration between release and lengthens the time taken for a follow up offence and hence it may not be wise to terminate the working program. However, we have to test the assumptions of the model to see if the model is valid in the first place. Based on the residual plot, we note that the mean of the residuals is significantly above 0 for low fitted values and also above 0 for high fitted values. This indicates we have not correctly modelled the linear regression and the estimates are biased and inconsistent. Either way, we would not agree with the warden to terminate the working program as yet as we cannot reach a fruitful conclusion with the model. }
+
+```{r q2b, echo=TRUE}
+# Test Assumptions through residual plot
+plot(fit_w,1)
+```
+
+
+(2c) Criminal offense lawyers usually fight for supervised release of the offender. Given five variables in `out` data set: `super`, `rules`, `age`, `tserved`, and `married`, how could you help the law firm to predict the outcome of a recent case given that a 32-year old married client has been serving the jail time for 3 years and 7 months and during which broken no rule in the prison? Choose a proper model with those 5 variables and interpert meaning of the coefficients in your model. (8 point)
+
+Note: Classify a successful supervised release case if probability of supervised release is greater or equal to 0.5; and no supervised release otherwise.
+
+
+\textcolor{BrickRed}{rules: As the convict breaks 1 more rule in prison, the log-odds of supervised release will decrease by 0.246. age: As the convict’s age increases by 1 month, the log-odds of supervised release will decrease by 0.0019. tserved: As the convict serves 1 more month in prison, the log-odds of supervised release will increase by 0.0324. married: If the convict is married, the log-odds of supervised release will increase by 0.508.All 4 variables are significant at the 5percent level. It is a successful supervised release case as the probability is 0.905 which is greater or equal to 0.5}
+
+```{r q2c, echo=TRUE}
+glm.fit = glm(super~rules + age + tserved + married, family = binomial, data = out) 
+# display the output of logistic regression
+summary(glm.fit)
+
+new.out = data.frame(rules =c(0), age = c(384), tserved = c(43), married = c(1) )
+glm.probs = predict(glm.fit, newdata = new.out, type = "response") 
+glm.probs
+```
+
+### Question 3 (20 Points)
+
+- Dataset required: `attend` (wooldridge)
+
+In this question, we will be doing a model selection, principal component analysis, building a simple logit classifier, and finally assessing the output of that classifier for class performance.
+
+The dataset for this question is available at: https://rdrr.io/cran/wooldridge/man/attend.html. a public available dataset about class attendance and final/GPA performance. Again, you need to install and load package `wooldridge` to conveniently load the data into your R workplace. 
+
+```{r q3-dataloading, echo=TRUE}
+data('attend')
+```
+
+Here are the variables in the dataset:
+
+- `attend`: classes attended out of 32.
+- `termGPA`: GPA for current term.
+- `priGPA`: cumulative GPA prior to current term.
+- `ACT`: ACT score.
+- `final`: final test score.
+- `atndrte`: percentage of class attendance, i.e. `attend` divided by `32`.
+- `hwrte`: percentage of homework turned in.
+- `frosh`: freshme if = 1.
+- `soph`: sophomore if = 1.
+- `missed`: number of classess missed, i.e. `attend` + `missed` = 32.
+- `stndfnl`: standardized final test score, i.e. (`final`-mean)/sd.
+
+In the code below I make a new variable `pass` (pass the exam) which is one if student's final performance belongs to upper 40% of class comparable to his/her peers (curved) based on the standardized final test score, i.e. `stndfnl` is greater than 60th-quantile of `stndfnl`, This would be a binary dependent variable we shall use.
+
+In this question, we will be interested in using the independent variables (student's class attendance) to classify the sample into whether student will pass or not. 
+
+Here are what the independent variables look like (using the `pairs.panels()` function from the `psych` package)
+
+```{r q3-read-in-dataset, echo=TRUE, fig.width=10}
+# create a binary variable 'pass',
+attend$pass = ifelse(attend$stndfnl > quantile(attend$stndfnl, 0.6), 1, 0)
+# removing NA's in the data, just to avoid some programming issues later. 
+# WARNING: don't simply do this in your future projects.
+
+attend <- attend[complete.cases(attend),]
+# Selecting out the independent variables "X".
+attendX <- attend %>% select(c("attend", "termGPA", "priGPA", "ACT", "hwrte"))
+psych::pairs.panels(attendX, lm=TRUE)
+```
+
+(3a)
+Let's first start with our "kitchen sink" regression model `stndfnl ~ attend + termGPA + priGPA + ACT + hwrte + frosh + soph` with entire data set `attend`. (1) using `linearHypothesis()` to jointly test if `forsh = soph = 0`, i.e. transition into college does not affect class performance and draw your conclusion for the test; (2) run a automated backward model selection using `step()` function and interpret the coefficient of `attend`. (4 points)
+
+\textcolor{BrickRed}{(Q3a) null hypothesis: the unrestricted model is not significantly better than restricted one in terms of explanatory power for stndfnl.}
+
+\textcolor{BrickRed}{p-value is 0.1147 and 0.1147 > 0.05. Thus, there is no enough reason for us to reject the null hypothesis}
+
+\textcolor{BrickRed}{The coefficient of attend is (-0.02) from the automated backward model. On average, a one unit increase in attend results in |0.02| unit will decrease (due to the - sign of attend coefficient) in the standardised final test score}
+
+```{r, q3a, echo=TRUE}
+mod_unrestricted = stndfnl ~ attend + termGPA + priGPA + ACT + hwrte + frosh + soph
+fit_unrestricted = lm(mod_unrestricted, data = attend)
+#(1)
+linearHypothesis(model=fit_unrestricted, c("frosh=0", "soph=0"))
+#(2)
+step(fit_unrestricted,direction = "backward")
+```
+
+
+(3b)
+From the correlation matrix at the very begining, we can see that many of the independent variables are highly correlated with each other. Let's try to summarize the data using principal component analysis (PCA). (6 points)
+
+- Use the `prcomp` function to conduct a PCA. (We'll have to feed `attendX`, not `attend`, into `prcomp`)
+- What is the cumulative proportion of variance explained by the first three PCs?
+- Extract the first three PCs and pass them to `attend`. We'll be using these as predictors.
+
+By using `<pca_object>$rotation[,1:3]`, you can see the loadings on the first 3 PCs.
+We will not be attempting to interpret the PCs in this question because it's generally hard to come up with a meaningful interpretation over principal components which are just indices. 
+The only thing to be pointed out, is that PC1 is **negatively** correlated with **every** single variable (to verify if you did it right). Now, Principal Components are just vectors in some high-dimensional space, and so actually it doesn't make sense to tell whether it's a vector pointing right or pointing left, it's just how it is pointing relative to all the other variables. So we can guess, not being trained as an education professional, is that PC1 roughly captures the characteristics of a "lazy" student. (We can thus immediately make a prediction as to the sign of the coefficient if we used PC1 to predict final test score, even before we run Q3c below. Try and have a guess!)
+
+But in general I would recommend that if you do end up using PCA for your future works, to at least attempt to interpret the PCs, in the spirit of understanding more about the data.
+
+\textcolor{BrickRed}{87.4 percent for top 3 PCs}
+
+```{r, q3b, echo=TRUE}
+summary(attendX)
+pca_attendX <- prcomp(attendX, center = TRUE, scale = TRUE)
+summary(pca_attendX)
+
+attendX_pca = attend
+attendX_pca$pc1 = pca_attendX$x[,"PC1"]
+attendX_pca$pc2 = pca_attendX$x[,"PC2"]
+attendX_pca$pc3 = pca_attendX$x[,"PC3"]
+pcafit = lm(pass ~ pc1 + pc2 + pc3, attendX_pca)
+
+#rbind(pca_attendX$rotation[,"PC1"], pca_attendX$rotation[,"PC2"], pca_attendX$rotation[,"PC3"])
+rbind(pca_attendX$rotation[,1:3])
+
+biplot(pca_attendX)
+```
+
+ 
+
+(3c)
+Construct and run a logistic regression with entire data set `attend`, run a logistic regression of `pass` on the top three principal components. Which coefficients are statistically significant? 
+
+Using a model with all three PCs, use `predict(<glm_object>, type='response')` to ask the model to predict the probability of pass. Let's make our rule to define the predicted value of `pass`: one if the predicted probability is >=0.50, that is the model says "pass"; zero if it's <0.50, that is the model says "fail". Pass the binary predictions to a variable named `pred_pass` in `attend`. How many "Yes" and "No" predictions did the model make? (6 points)
+
+\textcolor{BrickRed}{Small p-value rejects the null hypothesis and it is statistically significant. Both pc1 and pc2 are having p-valus < 0.05, they are statistically significant}
+
+```{r, q3c, echo=TRUE}
+# display the output of logistic regression - attend
+logit_attend = glm(pass~termGPA +  priGPA + ACT + final + atndrte + hwrte + frosh + soph + missed + stndfnl, data = attend) 
+# display the output of logistic regression - pca 1~3
+summary(logit_attend)
+
+logit_attend_pca = glm(pass ~ pc1 + pc2 + pc3, family=binomial, attendX_pca, control = list(maxit = 50))
+summary(logit_attend_pca)
+
+attend_predict <- predict(logit_attend_pca, type = 'response')
+predit_pass <-ifelse(attend_predict>=0.5,"pass","fail")
+
+attend$predit_pass <- predit_pass
+head(attend) #check that column has been added
+sum(predit_pass == "pass")
+sum(predit_pass == "fail")
+
+#actual pass and fail
+actual_pass <-ifelse(attend$pass>=0.5,"A_pass","A_fail")
+sum(actual_pass == "A_pass")
+sum(actual_pass == "A_fail")
+
+```
+
+
+(3d) Finally, let's manually construct a classification matrix using `table()` function in base R rather than `caret::confusionMatrix()`.
+
+Use `table(x1, x2)` with both your model's "Pass/Fail" predictions and the actual observed `pass` values. I recommend using the same convention in the lecture slides, where we have actual values on the columns and model prediction on the rows. *We say "pass" as possitive event.* (4 points)
+
+- How many True Positives are there?
+- How many True Negatives are there?
+- How many False Positives are there?
+- How many False Negatives are there?
+
+- What is the model's overall classification accuracy?
+- What is the model's sensitivity?
+- What is the model's precision?
+- What is the model's F1-score?
+
+\textcolor{BrickRed}{TP = 107}
+
+\textcolor{BrickRed}{TN = 374}
+
+\textcolor{BrickRed}{FP = 56}
+
+\textcolor{BrickRed}{FN = 137}
+
+\textcolor{BrickRed}{Overall classification accuracy = (TP+TN)/(TP+TN+FP+FN) = 0.71}
+
+\textcolor{BrickRed}{Sensitivity = TP/(TP+FN) = 107/(107+137) = 0.44}
+
+\textcolor{BrickRed}{Precision = TP/(TP+FP) = 107/(107+56) = 0.66}
+
+\textcolor{BrickRed}{F1-score = 2 x Precision x Sensitivity/(Precision+Sensitivity)}
+\textcolor{BrickRed}{F1-score = 2 x 0.66 x 0.44/(0.66+0.44) = 0.53}
+```{r q3d, echo=TRUE}
+table(predit_pass)
+table(actual_pass)
+compare1 = table(predit_pass, actual_pass)
+print(compare1)
+```

@@ -27,6 +27,14 @@ library(car)
 library(sandwich)
 library(lmtest)
 library(caret)
+library(pca3d)
+library(rms)
+library(leaps)
+library(psych)
+library(animation)
+library(factoexrta)
+
+
 ```
 ## Part C: Data Analytics (50 points)
 
@@ -39,7 +47,7 @@ how players are recruited, \drafted," for each team.
 Answer the following questions.
 
 ```{r data-input, echo=TRUE}
-nba = read.csv(file = 'output.csv', header= TRUE)
+nba = read.csv(file = './data/output.csv', header= TRUE)
 ```
 
 Details
@@ -52,7 +60,34 @@ a. Apply \k-means" algorithm.
 \textcolor{BrickRed}{When all other independent variables are held constant, tserved: -0.25630 shows that time served is negatively correlated to durat. Every 1 unit shift in tserved causes a -0.25630 change in the mean of the time until return for the prisoner which suggests a quicker relapse time the longer the time served. tserved is significant at 5 percent level. workprg: 2.32777 shows a positive correlation to durat. Convicts who have gone through the prison working program will relapse into criminal offense after release from the prison later by approximately 2.33 months. However, this variable is not significant at the 5 percent level, not even at the 10 percent level. Hence, this variable should not be retained from the regression results.}
 
 ```{r q2a, echo=TRUE}
-km_nba = kmeans(nba, center = 3, nstart = 10)
+nba_salary = subset(nba, select = c(salary))
+
+nba_rmv_null = nba[-which(sapply(nba, is.null))]
+nba_unlist <- as.numeric(unlist(nba_rmv_null))
+
+
+
+km_nba = kmeans(nba_salary, center = 3, nstart = 10)
+
+fviz_cluster(km_nba, data = nba,
+             palette = c("#00AFBB","#2E9FDF", "#FC4E07"),
+             ggtheme = theme_minimal(),
+             main = "Three clusters on the plane of first two PCs of 'mroz'.")
+
+
+# plot the ``within-cluster sum of squares distance'' as a function of the number of clusters
+wss = rep(NA, 10)
+for (k in c(1:10)){
+  wss[k] = kmeans(nba_unlist, k, nstart = 10)$tot.withinss
+}
+# cexs = rep(1, length(wss))
+# cexs[3] = 2
+# pchs = rep(1, length(wss))
+# pchs[3] = 2
+# cols = rep('black', length(wss))
+# cols[3] = 'red'
+# plot(wss, type = 'b', xlab = 'number of clusters, k', ylab = 'within cluster sum of squares distance', col = cols, pch = pchs, cex = cexs)
+# # when choosing the ``best'' number of clusters, look for the ``elbow''! In this case, either k = 3 or k = 4.
 
 ```
 
